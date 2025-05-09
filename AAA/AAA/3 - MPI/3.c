@@ -1,0 +1,63 @@
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define OMPA_MCA true
+
+int main(int argc, char* argv[]) {
+    int rank, size, N;
+    int *arr = NULL, *sub_arr = NULL;
+    int local_sum = 0, total_sum = 0;
+    int elements_per_proc;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Only root process gets input
+    if (rank == 0) {
+        printf("Enter total number of elements (multiple of %d): ", size);
+        scanf("%d", &N);
+
+        if (N % size != 0) {
+            printf("Number of elements must be divisible by number of processes (%d).\n", size);
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
+
+        // Allocate and read array
+        arr = (int*)malloc(N * sizeof(int));
+        printf("Enter %d integers:\n", N);
+        for (int i = 0; i < N; i++) {
+            scanf("%d", &arr[i]);
+        }
+    }
+
+    // Broadcast value of N
+    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    elements_per_proc = N / size;
+
+    // Allocate space for sub-arrays
+    sub_arr = (int*)malloc(elements_per_proc * sizeof(int));
+
+    // Scatter data
+    MPI_Scatter(arr, elements_per_proc, MPI_INT, sub_arr, elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Compute local sum
+    for (int i = 0; i < elements_per_proc; i++) {
+        local_sum += sub_arr[i];
+    }
+
+    printf("Process %d: Local sum = %d\n", rank, local_sum);
+
+    // Reduce to get total sum
+    MPI_Reduce(&local_sum, &total_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        printf("\nTotal Sum = %d\n", total_sum);
+        free(arr);
+    }
+
+    free(sub_arr);
+    MPI_Finalize();
+    return 0;
+}
+
