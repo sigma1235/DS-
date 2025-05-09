@@ -1,0 +1,6 @@
+javac *.java
+rmiregistry
+or
+start rmiregistry 2000
+java StringServer
+java StringClient

@@ -1,0 +1,9 @@
+# 1. Install OpenMPI
+sudo apt update
+sudo apt install openmpi-bin libopenmpi-dev -y
+
+# Compile
+mpicc mpi_message.c  -o  mpi_message
+
+# Run with 2 processes
+mpirun -np 2 ./mpi_message

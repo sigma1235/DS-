@@ -1,0 +1,14 @@
+javac BerkeleyClock.java
+java BerkeleyClock
+
+
+Enter number of slave nodes: 2
+Enter time for each node in HH:MM (master first):
+Node 0: 14:00
+Node 1: 13:46
+Node 2: 14:20
+
+Adjusted times:
+Node 0 -> 14:02 (adjust by +2 mins)
+Node 1 -> 14:02 (adjust by +16 mins)
+Node 2 -> 14:02 (adjust by -18 mins)
